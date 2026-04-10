@@ -2,43 +2,198 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>E-JUST PharmD CGPA Simulator</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    table { border-collapse: collapse; width: 100%; margin-bottom: 5px; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-    th { background: #f2f2f2; }
-    input { width: 80px; }
-    .semester { margin-top: 30px; }
-    h2 { margin-bottom: 10px; }
-    .gpa { font-weight: bold; margin-top: 10px; }
-    .cgpa-box {
-      background: #f9f9f9;
-      border: 2px solid #444;
-      padding: 5px;
-      font-size: 18px;
-      font-weight: bold;
-      margin-top: 30px;
-      text-align: center;
+    :root {
+      --primary: #0f2c59;      /* Deep Navy Blue */
+      --secondary: #d80032;    /* Vibrant Red */
+      --background: #f4f7f6;   /* Soft Light Gray */
+      --card-bg: #ffffff;      /* Pure White */
+      --text-main: #333333;
+      --text-muted: #777777;
     }
-    .add-btn { margin: 10px 0; }
-    .note { font-size: 12px; color: #666; font-style: italic; margin-bottom: 15px; display: block; }
-    th:nth-child(1), td:nth-child(1) { width: 8%; }  /* Code */
-    th:nth-child(2), td:nth-child(2) { width: 25%; }  /* Course */
-    th:nth-child(3), td:nth-child(3) { width: 8%; }   /* Credits */
-    th:nth-child(4), td:nth-child(4) { width: 10%; }  /* Total Marks */
-    th:nth-child(5), td:nth-child(5) { width: 12%; }  /* Expected Mark */
-    th:nth-child(6), td:nth-child(6) { width: 12%; }  /* Marks Lost */
-    th:nth-child(7), td:nth-child(7) { width: 8%; }   /* Grade */
-    th:nth-child(8), td:nth-child(8) { width: 8%; }   /* Points */
-    th:nth-child(9), td:nth-child(9) { width: 9%; }   /* To Lower Grade */
+
+    body { 
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+      background-color: var(--background); 
+      color: var(--text-main); 
+      margin: 0; 
+      padding: 20px 20px 100px 20px; /* Extra bottom padding for sticky footer */
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    h1 { 
+      text-align: center; 
+      color: var(--primary); 
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 40px;
+      text-transform: uppercase;
+    }
+
+    .semester { 
+      background: var(--card-bg); 
+      border-radius: 12px; 
+      padding: 25px; 
+      margin-bottom: 30px; 
+      box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+      border-top: 4px solid var(--primary);
+      transition: transform 0.2s ease;
+    }
+
+    h2 { 
+      margin-top: 0; 
+      color: var(--primary); 
+      border-bottom: 2px solid #eee; 
+      padding-bottom: 15px; 
+      font-size: 1.4rem;
+    }
+
+    /* Table Styling */
+    .table-container {
+      overflow-x: auto; /* Makes table scrollable on small phones */
+    }
+
+    table { 
+      border-collapse: collapse; 
+      width: 100%; 
+      margin-bottom: 10px; 
+      margin-top: 10px;
+    }
+
+    th { 
+      background: var(--background); 
+      color: var(--primary); 
+      padding: 12px; 
+      font-weight: 600; 
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      border-bottom: 2px solid #ddd;
+    }
+
+    td { 
+      padding: 12px 8px; 
+      text-align: center; 
+      border-bottom: 1px solid #eee;
+      vertical-align: middle;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    
+    tr:hover { background-color: #fafbfc; }
+
+    /* Input Styling */
+    input[type="number"] { 
+      width: 65px; 
+      padding: 8px; 
+      border: 1px solid #ccc; 
+      border-radius: 6px; 
+      text-align: center; 
+      font-size: 14px;
+      font-family: inherit;
+      transition: all 0.3s ease;
+      background-color: #f9f9f9;
+    }
+
+    input[type="number"]:focus {
+      outline: none;
+      border-color: var(--primary);
+      background-color: #fff;
+      box-shadow: 0 0 0 3px rgba(15, 44, 89, 0.1);
+    }
+
+    /* Remove arrows from number inputs for a cleaner look */
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
+
+    .note { 
+      font-size: 12px; 
+      color: var(--text-muted); 
+      font-style: italic; 
+      display: block; 
+      text-align: right;
+      margin-bottom: 20px;
+    }
+
+    /* GPA Summary Bar inside cards */
+    .gpa { 
+      background: #eef2f5; 
+      padding: 15px; 
+      border-radius: 8px; 
+      display: flex; 
+      justify-content: space-around; 
+      align-items: center; 
+      flex-wrap: wrap;
+      gap: 10px;
+      font-weight: 600; 
+      color: var(--primary); 
+    }
+
+    .gpa span { display: flex; align-items: center; gap: 8px; }
+
+    /* Buttons */
+    .add-btn { 
+      background: var(--secondary); 
+      color: white; 
+      border: none; 
+      padding: 12px 20px; 
+      border-radius: 6px; 
+      cursor: pointer; 
+      font-size: 15px; 
+      font-weight: 600;
+      margin-top: 20px; 
+      width: 100%;
+      transition: background 0.3s ease, transform 0.1s ease;
+    }
+
+    .add-btn:hover { background: #b00028; }
+    .add-btn:active { transform: scale(0.98); }
+
+    /* Sticky Footer for CGPA */
+    .cgpa-box {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: var(--primary);
+      color: white;
+      text-align: center;
+      padding: 20px 10px;
+      font-size: 20px;
+      font-weight: 700;
+      box-shadow: 0 -4px 15px rgba(0,0,0,0.15);
+      z-index: 1000;
+      box-sizing: border-box;
+    }
+
+    /* Column Widths */
+    th:nth-child(1), td:nth-child(1) { width: 10%; font-weight: bold; color: var(--primary); }
+    th:nth-child(2), td:nth-child(2) { width: 25%; text-align: left; }
+    th:nth-child(3), td:nth-child(3) { width: 8%; }
+    th:nth-child(4), td:nth-child(4) { width: 10%; color: var(--text-muted); }
+    th:nth-child(5), td:nth-child(5) { width: 12%; }
+    th:nth-child(6), td:nth-child(6) { width: 12%; }
+    th:nth-child(7), td:nth-child(7) { width: 8%; font-weight: bold; font-size: 1.1rem; }
+    th:nth-child(8), td:nth-child(8) { width: 8%; }
+    th:nth-child(9), td:nth-child(9) { width: 7%; color: var(--secondary); font-size: 0.9rem;}
   </style>
 </head>
 <body>
-  <h1 style="text-align: center;">PharmD CGPA Simulator (Level 1)</h1>
 
-  <div id="semesters"></div>
-  <div id="cgpaBox" class="cgpa-box">Cumulative GPA (CGPA): -</div>
+  <div class="container">
+    <h1>PharmD CGPA Simulator</h1>
+    <div id="semesters"></div>
+  </div>
+
+  <div id="cgpaBox" class="cgpa-box">Cumulative GPA (CGPA): - | Credits: 0 | Passed: 0</div>
 
   <script>
     // E-JUST PharmD Grading System based on the Academic Bylaw
@@ -56,7 +211,7 @@
 
     const semesters = [
       {
-        name: "Semester 1 (Fall)",
+        name: "Semester 1 (Fall - Level 1)",
         courses: [
           { code: "PMC111", name: "Pharmaceutical Analytical Chemistry I", credit: 3 },
           { code: "PMC112", name: "Pharmaceutical Organic Chemistry I", credit: 3 },
@@ -71,7 +226,7 @@
         ]
       },
       {
-        name: "Semester 2 (Spring)",
+        name: "Semester 2 (Spring - Level 1)",
         courses: [
           { code: "PMC123", name: "Pharmaceutical Analytical Chemistry II", credit: 3 },
           { code: "PMC124", name: "Pharmaceutical Organic Chemistry II", credit: 3 },
@@ -99,23 +254,26 @@
       title.textContent = sem.name;
       div.appendChild(title);
 
+      const tableContainer = document.createElement("div");
+      tableContainer.classList.add("table-container");
+
       const table = document.createElement("table");
       table.innerHTML = `
         <tr>
           <th>Code</th>
           <th>Course</th>
           <th>Credits</th>
-          <th>Total Marks</th>
-          <th>Expected Mark</th>
-          <th>Marks Lost</th>
+          <th>Total</th>
+          <th>Expected</th>
+          <th>Lost</th>
           <th>Grade</th>
           <th>Points</th>
-          <th>To Lower Grade</th>
+          <th>Lower</th>
         </tr>
       `;
 
       sem.courses.forEach((course, cIndex) => {
-        const total = 100; // ALL COURSES OUT OF 100
+        const total = 100; 
         const creditDisplay = course.inGPA === false ? `${course.credit}*` : course.credit;
         
         const row = document.createElement("tr");
@@ -133,7 +291,8 @@
         table.appendChild(row);
       });
 
-      div.appendChild(table);
+      tableContainer.appendChild(table);
+      div.appendChild(tableContainer);
 
       const note = document.createElement("span");
       note.classList.add("note");
@@ -143,9 +302,9 @@
       const gpaDiv = document.createElement("div");
       gpaDiv.classList.add("gpa");
       gpaDiv.innerHTML = `
-        GPA: <input id="gpaVal-${sIndex}" type="number" step="0.01" style="width:70px" oninput="manualGPA(${sIndex}, true)"> |
-        Credits: <input id="gpaCredits-${sIndex}" type="number" step="1" style="width:70px" oninput="manualGPA(${sIndex}, true)"> |
-        Passed: <input id="gpaPassed-${sIndex}" type="number" step="1" style="width:70px" oninput="manualGPA(${sIndex}, true)">
+        <span>GPA: <input id="gpaVal-${sIndex}" type="number" step="0.01" oninput="manualGPA(${sIndex}, true)"></span>
+        <span>Credits: <input id="gpaCredits-${sIndex}" type="number" step="1" oninput="manualGPA(${sIndex}, true)"></span>
+        <span>Passed: <input id="gpaPassed-${sIndex}" type="number" step="1" oninput="manualGPA(${sIndex}, true)"></span>
       `;
       div.appendChild(gpaDiv);
 
@@ -192,7 +351,7 @@
 
     function updateGrade(sIndex, cIndex, isLost) {
       const course = semesters[sIndex].courses[cIndex];
-      const total = 100; // ALL COURSES OUT OF 100
+      const total = 100;
 
       const markInput = document.getElementById(`mark-${sIndex}-${cIndex}`);
       const lostInput = document.getElementById(`lost-${sIndex}-${cIndex}`);
@@ -245,6 +404,13 @@
         if (idx === -1) idx = gradingSystem.length - 1;
 
         const gradeObj = gradingSystem[idx];
+        
+        // Dynamic coloring for grades
+        if(gradeObj.grade.includes("A")) gradeCell.style.color = "#008000";
+        else if(gradeObj.grade.includes("B") || gradeObj.grade.includes("C")) gradeCell.style.color = "#0f2c59";
+        else if(gradeObj.grade === "F") gradeCell.style.color = "#d80032";
+        else gradeCell.style.color = "inherit";
+
         gradeCell.textContent = gradeObj.grade;
         pointCell.textContent = gradeObj.point.toFixed(2);
         course.point = gradeObj.point;
@@ -282,12 +448,10 @@
           let semCredits = 0, semPoints = 0, semPassed = 0;
           sem.courses.forEach(course => {
             if (course.point !== undefined) {
-              // Add to GPA calculations ONLY if the course is included in GPA
               if (course.inGPA !== false) {
                 semCredits += course.credit;
                 semPoints += course.credit * course.point;
               }
-              // Add to passed credits regardless of GPA inclusion (as long as it's not an F)
               if (course.grade !== "F") semPassed += course.credit;
             }
           });
@@ -303,7 +467,6 @@
               document.getElementById(`gpaCredits-${sIndex}`).value = semCredits;
               document.getElementById(`gpaPassed-${sIndex}`).value = semPassed;
             } else if (semPassed > 0) {
-                // Edge case: User only entered grades for LRA courses in a semester
                 document.getElementById(`gpaVal-${sIndex}`).value = "-";
                 document.getElementById(`gpaCredits-${sIndex}`).value = 0;
                 document.getElementById(`gpaPassed-${sIndex}`).value = semPassed;

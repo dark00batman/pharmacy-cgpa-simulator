@@ -3,15 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PharmD CGPA Simulator</title>
+  <title>E-JUST PharmD CGPA Simulator</title>
   <style>
+    /* CSS Variables for Easy Theme Switching */
     :root {
-      --primary: #0f2c59;      /* Deep Navy Blue */
-      --secondary: #d80032;    /* Vibrant Red */
-      --background: #f4f7f6;   /* Soft Light Gray */
-      --card-bg: #ffffff;      /* Pure White */
+      --primary: #0f2c59;      
+      --secondary: #d80032;    
+      --success: #008000;
+      --background: #f4f7f6;   
+      --card-bg: #ffffff;      
       --text-main: #333333;
       --text-muted: #777777;
+      --table-border: #eeeeee;
+      --table-header-bg: #f4f7f6;
+      --input-bg: #f9f9f9;
+      --input-border: #cccccc;
+      --gpa-bar-bg: #eef2f5;
+    }
+
+    [data-theme="dark"] {
+      --primary: #5fa8d3;       /* Lighter blue for dark background */
+      --secondary: #ff4757;     /* Brighter red */
+      --success: #2ecc71;       /* Brighter green */
+      --background: #121212;   
+      --card-bg: #1e1e1e;      
+      --text-main: #e0e0e0;
+      --text-muted: #aaaaaa;
+      --table-border: #333333;
+      --table-header-bg: #1a1a1a;
+      --input-bg: #2c2c2c;
+      --input-border: #444444;
+      --gpa-bar-bg: #252525;
     }
 
     body { 
@@ -19,7 +41,8 @@
       background-color: var(--background); 
       color: var(--text-main); 
       margin: 0; 
-      padding: 20px 20px 100px 20px; /* Extra bottom padding for sticky footer */
+      padding: 20px 20px 100px 20px; 
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
 
     .container {
@@ -27,13 +50,41 @@
       margin: 0 auto;
     }
 
+    /* Header & Toggle Layout */
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
     h1 { 
-      text-align: center; 
+      margin: 0;
       color: var(--primary); 
       font-weight: 700;
       letter-spacing: -0.5px;
-      margin-bottom: 40px;
       text-transform: uppercase;
+    }
+
+    .theme-btn {
+      background: var(--card-bg);
+      color: var(--text-main);
+      border: 2px solid var(--table-border);
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .theme-btn:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
     }
 
     .semester { 
@@ -43,20 +94,19 @@
       margin-bottom: 30px; 
       box-shadow: 0 8px 20px rgba(0,0,0,0.05);
       border-top: 4px solid var(--primary);
-      transition: transform 0.2s ease;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
     }
 
     h2 { 
       margin-top: 0; 
       color: var(--primary); 
-      border-bottom: 2px solid #eee; 
+      border-bottom: 2px solid var(--table-border); 
       padding-bottom: 15px; 
       font-size: 1.4rem;
     }
 
-    /* Table Styling */
     .table-container {
-      overflow-x: auto; /* Makes table scrollable on small phones */
+      overflow-x: auto; 
     }
 
     table { 
@@ -67,51 +117,48 @@
     }
 
     th { 
-      background: var(--background); 
+      background: var(--table-header-bg); 
       color: var(--primary); 
       padding: 12px; 
       font-weight: 600; 
       font-size: 0.9rem;
       text-transform: uppercase;
-      border-bottom: 2px solid #ddd;
+      border-bottom: 2px solid var(--table-border);
+      transition: background-color 0.3s ease;
     }
 
     td { 
       padding: 12px 8px; 
       text-align: center; 
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid var(--table-border);
       vertical-align: middle;
     }
 
     tr:last-child td { border-bottom: none; }
     
-    tr:hover { background-color: #fafbfc; }
-
     /* Input Styling */
     input[type="number"] { 
       width: 65px; 
       padding: 8px; 
-      border: 1px solid #ccc; 
+      border: 1px solid var(--input-border); 
       border-radius: 6px; 
       text-align: center; 
       font-size: 14px;
       font-family: inherit;
+      color: var(--text-main);
+      background-color: var(--input-bg);
       transition: all 0.3s ease;
-      background-color: #f9f9f9;
     }
 
     input[type="number"]:focus {
       outline: none;
       border-color: var(--primary);
-      background-color: #fff;
-      box-shadow: 0 0 0 3px rgba(15, 44, 89, 0.1);
+      box-shadow: 0 0 0 2px var(--primary);
     }
 
-    /* Remove arrows from number inputs for a cleaner look */
     input[type=number]::-webkit-inner-spin-button, 
     input[type=number]::-webkit-outer-spin-button { 
-      -webkit-appearance: none; 
-      margin: 0; 
+      -webkit-appearance: none; margin: 0; 
     }
 
     .note { 
@@ -123,9 +170,8 @@
       margin-bottom: 20px;
     }
 
-    /* GPA Summary Bar inside cards */
     .gpa { 
-      background: #eef2f5; 
+      background: var(--gpa-bar-bg); 
       padding: 15px; 
       border-radius: 8px; 
       display: flex; 
@@ -135,11 +181,11 @@
       gap: 10px;
       font-weight: 600; 
       color: var(--primary); 
+      transition: background-color 0.3s ease;
     }
 
     .gpa span { display: flex; align-items: center; gap: 8px; }
 
-    /* Buttons */
     .add-btn { 
       background: var(--secondary); 
       color: white; 
@@ -157,24 +203,23 @@
     .add-btn:hover { background: #b00028; }
     .add-btn:active { transform: scale(0.98); }
 
-    /* Sticky Footer for CGPA */
     .cgpa-box {
       position: fixed;
       bottom: 0;
       left: 0;
       width: 100%;
       background: var(--primary);
-      color: white;
+      color: #ffffff; /* Always white regardless of theme */
       text-align: center;
       padding: 20px 10px;
       font-size: 20px;
       font-weight: 700;
-      box-shadow: 0 -4px 15px rgba(0,0,0,0.15);
+      box-shadow: 0 -4px 15px rgba(0,0,0,0.2);
       z-index: 1000;
       box-sizing: border-box;
+      transition: background-color 0.3s ease;
     }
 
-    /* Column Widths */
     th:nth-child(1), td:nth-child(1) { width: 10%; font-weight: bold; color: var(--primary); }
     th:nth-child(2), td:nth-child(2) { width: 25%; text-align: left; }
     th:nth-child(3), td:nth-child(3) { width: 8%; }
@@ -189,14 +234,17 @@
 <body>
 
   <div class="container">
-    <h1>PharmD CGPA Simulator</h1>
+    <div class="header-container">
+      <h1>PharmD CGPA Simulator</h1>
+      <button id="themeToggle" class="theme-btn">🌙 Dark Mode</button>
+    </div>
+    
     <div id="semesters"></div>
   </div>
 
   <div id="cgpaBox" class="cgpa-box">Cumulative GPA (CGPA): - | Credits: 0 | Passed: 0</div>
 
   <script>
-    // E-JUST PharmD Grading System based on the Academic Bylaw
     const gradingSystem = [
       {min: 95, grade: "A+", point: 4.0},
       {min: 90, grade: "A", point: 3.7},
@@ -241,7 +289,84 @@
     ];
 
     let currentSemesters = 1;
+    let isLoading = false; // Prevents saving while loading initial data
 
+    // --- DARK MODE LOGIC ---
+    const themeToggle = document.getElementById('themeToggle');
+    
+    function toggleTheme(isDark) {
+      if (isDark) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        themeToggle.textContent = "☀️ Light Mode";
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+        themeToggle.textContent = "🌙 Dark Mode";
+      }
+      if (!isLoading) saveData(); // Save preference
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const currentlyDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      toggleTheme(!currentlyDark);
+    });
+
+    // --- AUTO-SAVE LOGIC ---
+    function saveData() {
+      if (isLoading) return; 
+
+      const data = {
+        theme: document.documentElement.getAttribute('data-theme') || 'light',
+        currentSemesters: currentSemesters,
+        inputs: {}
+      };
+      
+      // Scrape all typed numbers and save them
+      document.querySelectorAll('input[type="number"]').forEach(inp => {
+        if (inp.value !== "") {
+          data.inputs[inp.id] = inp.value;
+        }
+      });
+
+      localStorage.setItem('ejust_pharmd_save', JSON.stringify(data));
+    }
+
+    function loadData() {
+      isLoading = true;
+      const savedString = localStorage.getItem('ejust_pharmd_save');
+      
+      if (!savedString) {
+        createSemester(0);
+        isLoading = false;
+        return;
+      }
+      
+      const data = JSON.parse(savedString);
+      
+      // 1. Restore Theme
+      if (data.theme === 'dark') toggleTheme(true);
+      
+      // 2. Restore Semesters
+      currentSemesters = data.currentSemesters || 1;
+      for (let i = 0; i < currentSemesters; i++) {
+        createSemester(i);
+      }
+      
+      // 3. Restore Inputs and Trigger Calculations
+      if (data.inputs) {
+        Object.keys(data.inputs).forEach(id => {
+          const el = document.getElementById(id);
+          if (el) {
+            el.value = data.inputs[id];
+            el.dispatchEvent(new Event('input')); // This wakes up updateGrade()
+          }
+        });
+      }
+      
+      isLoading = false;
+      calculateCGPA(); // Final pass
+    }
+
+    // --- CORE SIMULATOR LOGIC ---
     function createSemester(sIndex) {
       const container = document.getElementById("semesters");
       const sem = semesters[sIndex];
@@ -316,6 +441,7 @@
           currentSemesters++;
           createSemester(currentSemesters - 1);
           btn.remove();
+          saveData();
         };
         div.appendChild(btn);
       }
@@ -405,10 +531,10 @@
 
         const gradeObj = gradingSystem[idx];
         
-        // Dynamic coloring for grades
-        if(gradeObj.grade.includes("A")) gradeCell.style.color = "#008000";
-        else if(gradeObj.grade.includes("B") || gradeObj.grade.includes("C")) gradeCell.style.color = "#0f2c59";
-        else if(gradeObj.grade === "F") gradeCell.style.color = "#d80032";
+        // Match CSS Variables for dynamic text coloring
+        if(gradeObj.grade.includes("A")) gradeCell.style.color = "var(--success)";
+        else if(gradeObj.grade.includes("B") || gradeObj.grade.includes("C")) gradeCell.style.color = "var(--primary)";
+        else if(gradeObj.grade === "F") gradeCell.style.color = "var(--secondary)";
         else gradeCell.style.color = "inherit";
 
         gradeCell.textContent = gradeObj.grade;
@@ -463,13 +589,13 @@
           if (gpaInput) {
             if (semCredits > 0) {
               const gpa = semPoints / semCredits;
-              document.getElementById(`gpaVal-${sIndex}`).value = gpa.toFixed(2);
+              gpaInput.value = gpa.toFixed(2);
               document.getElementById(`gpaCredits-${sIndex}`).value = semCredits;
               document.getElementById(`gpaPassed-${sIndex}`).value = semPassed;
             } else if (semPassed > 0) {
-                document.getElementById(`gpaVal-${sIndex}`).value = "-";
-                document.getElementById(`gpaCredits-${sIndex}`).value = 0;
-                document.getElementById(`gpaPassed-${sIndex}`).value = semPassed;
+              gpaInput.value = "-";
+              document.getElementById(`gpaCredits-${sIndex}`).value = 0;
+              document.getElementById(`gpaPassed-${sIndex}`).value = semPassed;
             }
           }
         }
@@ -482,9 +608,13 @@
       } else {
         cgpaBox.textContent = `Cumulative GPA (CGPA): - | Credits: 0 | Passed: ${totalPassed}`;
       }
+
+      saveData(); // Trigger save at the end of calculation
     }
 
-    createSemester(0);
+    // Initialize application by loading any saved data
+    loadData();
+
   </script>
 </body>
 </html>

@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>E-JUST PharmD CGPA Simulator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background: #f2f2f2;
+        }
+
+        input {
+            width: 80px;
+        }
+
+        .semester {
+            margin-top: 30px;
+        }
+
+        h2 {
+            margin-bottom: 10px;
+        }
+
+        .gpa {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .cgpa-box {
+            background: #f9f9f9;
+            border: 2px solid #444;
+            padding: 5px;
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .add-btn {
+            margin: 10px 0;
+        }
+
+        th:nth-child(1),
+        td:nth-child(1) {
+            width: 8%;
+        }
+
+        /* Code */
+        th:nth-child(2),
+        td:nth-child(2) {
+            width: 25%;
+        }
+
+        /* Course */
+        th:nth-child(3),
+        td:nth-child(3) {
+            width: 8%;
+        }
+
+        /* Credits */
+        th:nth-child(4),
+        td:nth-child(4) {
+            width: 10%;
+        }
+
+        /* Total Marks */
+        th:nth-child(5),
+        td:nth-child(5) {
+            width: 12%;
+        }
+
+        /* Expected Mark */
+        th:nth-child(6),
+        td:nth-child(6) {
+            width: 12%;
+        }
+
+        /* Marks Lost */
+        th:nth-child(7),
+        td:nth-child(7) {
+            width: 8%;
+        }
+
+        /* Grade */
+        th:nth-child(8),
+        td:nth-child(8) {
+            width: 8%;
+        }
+
+        /* Points */
+        th:nth-child(9),
+        td:nth-child(9) {
+            width: 9%;
+        }
+
+        /* To Lower Grade */
+    </style>
+</head>
+
+<body>
+    <h1 style="text-align: center;">PharmD CGPA Simulator (Level 1)</h1>
+
+    <div id="semesters"></div>
+    <div id="cgpaBox" class="cgpa-box">Cumulative GPA (CGPA): -</div>
+
+    <script>
+        // E-JUST PharmD Grading System based on the Academic Bylaw
+        const gradingSystem = [
+            { min: 95, grade: "A+", point: 4.0 },
+            { min: 90, grade: "A", point: 3.7 },
+            { min: 85, grade: "B+", point: 3.3 },
+            { min: 80, grade: "B", point: 3.0 },
+            { min: 75, grade: "C+", point: 2.7 },
+            { min: 70, grade: "C", point: 2.3 },
+            { min: 65, grade: "D+", point: 2.0 },
+            { min: 60, grade: "D", point: 1.7 },
+            { min: 0, grade: "F", point: 1.0 }
+        ];
+
+        const semesters = [
+            {
+                name: "Semester 1 (Fall)",
+                courses: [
+                    { code: "PMC111", name: "Pharmaceutical Analytical Chemistry I", credit: 3 },
+                    { code: "PMC112", name: "Pharmaceutical Organic Chemistry I", credit: 3 },
+                    { code: "PHG111", name: "Medicinal Plants", credit: 3 },
+                    { code: "NPC111", name: "Information Technology", credit: 2 },
+                    { code: "LRA401", name: "Japanese Language (1)", credit: 1 },
+                    { code: "PIP111", name: "Pharmacy Orientation", credit: 1 },
+                    { code: "MED111", name: "Medical Terminology", credit: 1 },
+                    { code: "LRA415", name: "Human Rights and Fighting Corruption", credit: 1 },
+                    { code: "MTH114", name: "Calculus", credit: 1 },
+                    { code: "LRA101P", name: "Japanese Culture", credit: 1 }
+                ]
+            },
+            {
+                name: "Semester 2 (Spring)",
+                courses: [
+                    { code: "PMC123", name: "Pharmaceutical Analytical Chemistry II", credit: 3 },
+                    { code: "PMC124", name: "Pharmaceutical Organic Chemistry II", credit: 3 },
+                    { code: "MED122", name: "Human Anatomy & Histology", credit: 3 },
+                    { code: "PIP122", name: "Physical Pharmacy", credit: 3 },
+                    { code: "PHG122", name: "Pharmacognosy I", credit: 3 },
+                    { code: "PBM121", name: "Cell Biology", credit: 2 },
+                    { code: "LRA402", name: "Japanese Language (2)", credit: 1 },
+                    { code: "NPC122", name: "Psychology", credit: 1 }
+                ]
+            }
+        ];
+
+        let currentSemesters = 1;
+
+        function createSemester(sIndex) {
+            const container = document.getElementById("semesters");
+            const sem = semesters[sIndex];
+
+            const div = document.createElement("div");
+            div.classList.add("semester");
+            div.id = `semester-${sIndex}`;
+
+            const title = document.createElement("h2");
+            title.textContent = sem.name;
+            div.appendChild(title);
+
+            const table = document.createElement("table");
+            table.innerHTML = `
+        <tr>
+          <th>Code</th>
+          <th>Course</th>
+          <th>Credits</th>
+          <th>Total Marks</th>
+          <th>Expected Mark</th>
+          <th>Marks Lost</th>
+          <th>Grade</th>
+          <th>Points</th>
+          <th>To Lower Grade</th>
+        </tr>
+      `;
+
+            sem.courses.forEach((course, cIndex) => {
+                const total = course.credit * 100;
+                const row = document.createElement("tr");
+                row.innerHTML = `
+          <td>${course.code}</td>
+          <td>${course.name}</td>
+          <td>${course.credit}</td>
+          <td>${total}</td>
+          <td><input id="mark-${sIndex}-${cIndex}" type="number" min="0" max="${total}" oninput="updateGrade(${sIndex}, ${cIndex}, false)"></td>
+          <td><input id="lost-${sIndex}-${cIndex}" type="number" min="0" max="${total}" oninput="updateGrade(${sIndex}, ${cIndex}, true)"></td>
+          <td id="grade-${sIndex}-${cIndex}">-</td>
+          <td id="point-${sIndex}-${cIndex}">-</td>
+          <td id="lower-${sIndex}-${cIndex}">-</td>
+        `;
+                table.appendChild(row);
+            });
+
+            div.appendChild(table);
+
+            const gpaDiv = document.createElement("div");
+            gpaDiv.classList.add("gpa");
+            gpaDiv.innerHTML = `
+        GPA: <input id="gpaVal-${sIndex}" type="number" step="0.01" style="width:70px" oninput="manualGPA(${sIndex}, true)"> |
+        Credits: <input id="gpaCredits-${sIndex}" type="number" step="1" style="width:70px" oninput="manualGPA(${sIndex}, true)"> |
+        Passed: <input id="gpaPassed-${sIndex}" type="number" step="1" style="width:70px" oninput="manualGPA(${sIndex}, true)">
+      `;
+            div.appendChild(gpaDiv);
+
+            if (sIndex < semesters.length - 1) {
+                const btn = document.createElement("button");
+                btn.textContent = "+ Add Next Semester";
+                btn.classList.add("add-btn");
+                btn.onclick = () => {
+                    currentSemesters++;
+                    createSemester(currentSemesters - 1);
+                    btn.remove();
+                };
+                div.appendChild(btn);
+            }
+
+            container.appendChild(div);
+        }
+
+        function manualGPA(sIndex, fromInput = false) {
+            const gpa = parseFloat(document.getElementById(`gpaVal-${sIndex}`).value);
+            const credits = parseFloat(document.getElementById(`gpaCredits-${sIndex}`).value);
+            const passed = parseFloat(document.getElementById(`gpaPassed-${sIndex}`).value);
+
+            if (fromInput) {
+                semesters[sIndex].courses.forEach((c, cIndex) => {
+                    delete c.point;
+                    delete c.grade;
+                    document.getElementById(`mark-${sIndex}-${cIndex}`).value = "";
+                    document.getElementById(`lost-${sIndex}-${cIndex}`).value = "";
+                    document.getElementById(`grade-${sIndex}-${cIndex}`).textContent = "-";
+                    document.getElementById(`point-${sIndex}-${cIndex}`).textContent = "-";
+                    document.getElementById(`lower-${sIndex}-${cIndex}`).textContent = "-";
+                });
+            }
+
+            if (!isNaN(gpa) && !isNaN(credits)) {
+                semesters[sIndex].manual = { gpa, credits, passed: passed || 0 };
+            } else {
+                delete semesters[sIndex].manual;
+            }
+
+            calculateCGPA();
+        }
+
+        function updateGrade(sIndex, cIndex, isLost) {
+            const course = semesters[sIndex].courses[cIndex];
+            const total = course.credit * 100;
+
+            const markInput = document.getElementById(`mark-${sIndex}-${cIndex}`);
+            const lostInput = document.getElementById(`lost-${sIndex}-${cIndex}`);
+            const gradeCell = document.getElementById(`grade-${sIndex}-${cIndex}`);
+            const pointCell = document.getElementById(`point-${sIndex}-${cIndex}`);
+            const lowerCell = document.getElementById(`lower-${sIndex}-${cIndex}`);
+
+            if (semesters[sIndex].manual) {
+                document.getElementById(`gpaVal-${sIndex}`).value = "";
+                document.getElementById(`gpaCredits-${sIndex}`).value = "";
+                document.getElementById(`gpaPassed-${sIndex}`).value = "";
+                delete semesters[sIndex].manual;
+            }
+
+            if (isLost) {
+                const lostRaw = lostInput.value;
+                if (lostRaw === "" || isNaN(parseFloat(lostRaw))) {
+                    markInput.value = "";
+                    gradeCell.textContent = "-";
+                    pointCell.textContent = "-";
+                    lowerCell.textContent = "-";
+                    delete course.point;
+                    delete course.grade;
+                } else {
+                    let lost = parseFloat(lostRaw);
+                    lost = Math.max(0, Math.min(total, lost));
+                    markInput.value = total - lost;
+                }
+            } else {
+                const markRaw = markInput.value;
+                if (markRaw === "" || isNaN(parseFloat(markRaw))) {
+                    lostInput.value = "";
+                    gradeCell.textContent = "-";
+                    pointCell.textContent = "-";
+                    lowerCell.textContent = "-";
+                    delete course.point;
+                    delete course.grade;
+                } else {
+                    let mark = parseFloat(markRaw);
+                    mark = Math.max(0, Math.min(total, mark));
+                    lostInput.value = total - mark;
+                }
+            }
+
+            const mark = Math.round(parseFloat(markInput.value));
+            if (!isNaN(mark)) {
+                const percentage = (mark / total) * 100;
+
+                let idx = gradingSystem.findIndex(g => percentage >= g.min);
+                if (idx === -1) idx = gradingSystem.length - 1;
+
+                const gradeObj = gradingSystem[idx];
+                gradeCell.textContent = gradeObj.grade;
+                pointCell.textContent = gradeObj.point.toFixed(2);
+                course.point = gradeObj.point;
+                course.grade = gradeObj.grade;
+
+                if (gradeObj.min > 0) {
+                    const thresholdMarks = Math.ceil((gradeObj.min * total) / 100);
+                    const remaining = mark - thresholdMarks;
+                    lowerCell.textContent = remaining > 0 ? `${remaining}` : "-";
+                } else {
+                    lowerCell.textContent = "-";
+                }
+            }
+
+            const allCoursesEmpty = semesters[sIndex].courses.every(course => course.point === undefined);
+            if (allCoursesEmpty) {
+                document.getElementById(`gpaVal-${sIndex}`).value = "-";
+                document.getElementById(`gpaCredits-${sIndex}`).value = "0";
+                document.getElementById(`gpaPassed-${sIndex}`).value = "0";
+            }
+
+            calculateCGPA();
+        }
+
+        function calculateCGPA() {
+            let totalCredits = 0, totalPoints = 0, totalPassed = 0;
+
+            semesters.forEach((sem, sIndex) => {
+                if (sem.manual) {
+                    const { gpa, credits, passed } = sem.manual;
+                    totalCredits += credits;
+                    totalPoints += gpa * credits;
+                    totalPassed += passed;
+                } else {
+                    let semCredits = 0, semPoints = 0, semPassed = 0;
+                    sem.courses.forEach(course => {
+                        if (course.point !== undefined) {
+                            semCredits += course.credit;
+                            semPoints += course.credit * course.point;
+                            if (course.grade !== "F") semPassed += course.credit;
+                        }
+                    });
+                    totalCredits += semCredits;
+                    totalPoints += semPoints;
+                    totalPassed += semPassed;
+
+                    const gpaInput = document.getElementById(`gpaVal-${sIndex}`);
+                    if (gpaInput) {
+                        if (semCredits > 0) {
+                            const gpa = semPoints / semCredits;
+                            document.getElementById(`gpaVal-${sIndex}`).value = gpa.toFixed(2);
+                            document.getElementById(`gpaCredits-${sIndex}`).value = semCredits;
+                            document.getElementById(`gpaPassed-${sIndex}`).value = semPassed;
+                        }
+                    }
+                }
+            });
+
+            const cgpaBox = document.getElementById("cgpaBox");
+            if (totalCredits > 0) {
+                const cgpa = totalPoints / totalCredits;
+                cgpaBox.textContent = `Cumulative GPA (CGPA): ${cgpa.toFixed(2)} | Credits: ${totalCredits} | Passed: ${totalPassed}`;
+            } else {
+                cgpaBox.textContent = `Cumulative GPA (CGPA): - | Credits: 0 | Passed: 0`;
+            }
+        }
+
+        createSemester(0);
+    </script>
+</body>
+
+</html>

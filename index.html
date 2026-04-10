@@ -5,7 +5,7 @@
   <title>E-JUST PharmD CGPA Simulator</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; }
-    table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+    table { border-collapse: collapse; width: 100%; margin-bottom: 5px; }
     th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
     th { background: #f2f2f2; }
     input { width: 80px; }
@@ -22,6 +22,7 @@
       text-align: center;
     }
     .add-btn { margin: 10px 0; }
+    .note { font-size: 12px; color: #666; font-style: italic; margin-bottom: 15px; display: block; }
     th:nth-child(1), td:nth-child(1) { width: 8%; }  /* Code */
     th:nth-child(2), td:nth-child(2) { width: 25%; }  /* Course */
     th:nth-child(3), td:nth-child(3) { width: 8%; }   /* Credits */
@@ -61,12 +62,12 @@
           { code: "PMC112", name: "Pharmaceutical Organic Chemistry I", credit: 3 },
           { code: "PHG111", name: "Medicinal Plants", credit: 3 },
           { code: "NPC111", name: "Information Technology", credit: 2 },
-          { code: "LRA401", name: "Japanese Language (1)", credit: 1 },
+          { code: "LRA401", name: "Japanese Language (1)", credit: 1, inGPA: false },
           { code: "PIP111", name: "Pharmacy Orientation", credit: 1 },
           { code: "MED111", name: "Medical Terminology", credit: 1 },
-          { code: "LRA415", name: "Human Rights and Fighting Corruption", credit: 1 },
+          { code: "LRA415", name: "Human Rights and Fighting Corruption", credit: 1, inGPA: false },
           { code: "MTH114", name: "Calculus", credit: 1 },
-          { code: "LRA101P", name: "Japanese Culture", credit: 1 }
+          { code: "LRA101P", name: "Japanese Culture", credit: 1, inGPA: false }
         ]
       },
       {
@@ -78,7 +79,7 @@
           { code: "PIP122", name: "Physical Pharmacy", credit: 3 },
           { code: "PHG122", name: "Pharmacognosy I", credit: 3 },
           { code: "PBM121", name: "Cell Biology", credit: 2 },
-          { code: "LRA402", name: "Japanese Language (2)", credit: 1 },
+          { code: "LRA402", name: "Japanese Language (2)", credit: 1, inGPA: false },
           { code: "NPC122", name: "Psychology", credit: 1 }
         ]
       }
@@ -115,11 +116,13 @@
 
       sem.courses.forEach((course, cIndex) => {
         const total = 100; // ALL COURSES OUT OF 100
+        const creditDisplay = course.inGPA === false ? `${course.credit}*` : course.credit;
+        
         const row = document.createElement("tr");
         row.innerHTML = `
           <td>${course.code}</td>
           <td>${course.name}</td>
-          <td>${course.credit}</td>
+          <td>${creditDisplay}</td>
           <td>${total}</td>
           <td><input id="mark-${sIndex}-${cIndex}" type="number" min="0" max="${total}" oninput="updateGrade(${sIndex}, ${cIndex}, false)"></td>
           <td><input id="lost-${sIndex}-${cIndex}" type="number" min="0" max="${total}" oninput="updateGrade(${sIndex}, ${cIndex}, true)"></td>
@@ -131,6 +134,11 @@
       });
 
       div.appendChild(table);
+
+      const note = document.createElement("span");
+      note.classList.add("note");
+      note.textContent = "* Course is a graduation requirement but is NOT calculated in the GPA.";
+      div.appendChild(note);
 
       const gpaDiv = document.createElement("div");
       gpaDiv.classList.add("gpa");
@@ -274,8 +282,12 @@
           let semCredits = 0, semPoints = 0, semPassed = 0;
           sem.courses.forEach(course => {
             if (course.point !== undefined) {
-              semCredits += course.credit;
-              semPoints += course.credit * course.point;
+              // Add to GPA calculations ONLY if the course is included in GPA
+              if (course.inGPA !== false) {
+                semCredits += course.credit;
+                semPoints += course.credit * course.point;
+              }
+              // Add to passed credits regardless of GPA inclusion (as long as it's not an F)
               if (course.grade !== "F") semPassed += course.credit;
             }
           });
@@ -290,6 +302,11 @@
               document.getElementById(`gpaVal-${sIndex}`).value = gpa.toFixed(2);
               document.getElementById(`gpaCredits-${sIndex}`).value = semCredits;
               document.getElementById(`gpaPassed-${sIndex}`).value = semPassed;
+            } else if (semPassed > 0) {
+                // Edge case: User only entered grades for LRA courses in a semester
+                document.getElementById(`gpaVal-${sIndex}`).value = "-";
+                document.getElementById(`gpaCredits-${sIndex}`).value = 0;
+                document.getElementById(`gpaPassed-${sIndex}`).value = semPassed;
             }
           }
         }
@@ -300,7 +317,7 @@
         const cgpa = totalPoints / totalCredits;
         cgpaBox.textContent = `Cumulative GPA (CGPA): ${cgpa.toFixed(2)} | Credits: ${totalCredits} | Passed: ${totalPassed}`;
       } else {
-        cgpaBox.textContent = `Cumulative GPA (CGPA): - | Credits: 0 | Passed: 0`;
+        cgpaBox.textContent = `Cumulative GPA (CGPA): - | Credits: 0 | Passed: ${totalPassed}`;
       }
     }
 

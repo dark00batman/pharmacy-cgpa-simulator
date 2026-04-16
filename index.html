@@ -51,6 +51,7 @@
     .container {
       max-width: 1000px;
       margin: 0 auto;
+      position: relative;
     }
 
     /* Header & Toggle Layout */
@@ -206,6 +207,22 @@
     .add-btn:hover { background: #b00028; }
     .add-btn:active { transform: scale(0.98); }
 
+    /* Credits Styling */
+    .creators-credit {
+      text-align: center;
+      margin-top: 40px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+      transition: color 0.3s ease;
+    }
+
+    .creators-credit span {
+      color: var(--primary);
+    }
+
     .cgpa-box {
       position: fixed;
       bottom: 0;
@@ -257,6 +274,10 @@
     </div>
     
     <div id="semesters"></div>
+
+    <div class="creators-credit">
+      Made with ❤️ by <span>Kareem Mohamed</span> & <span>Yousef Yasser</span>
+    </div>
   </div>
 
   <div id="cgpaBox" class="cgpa-box">Cumulative GPA (CGPA): - | GPA Credits: 0 | Passed: 0</div>
@@ -307,7 +328,7 @@
 
     let currentSemesters = 1;
     let isLoading = false; 
-    let hasFiredConfetti = false; // متغير عشان نمنع الزينة تشتغل مع كل حرف بيتكتب
+    let hasFiredConfetti = false; 
 
     // --- DARK MODE LOGIC ---
     const themeToggle = document.getElementById('themeToggle');
@@ -643,7 +664,6 @@
         
         let scholarshipMsg = "";
         
-        // منطق الاحتفال والمنحة
         if (cgpa >= 3.85) {
             scholarshipMsg = "<span class='scholarship'> | 🏆 40% Scholarship!</span>";
             if (!hasFiredConfetti && !isLoading) {
@@ -657,7 +677,6 @@
                 hasFiredConfetti = true;
             }
         } else {
-            // لو الـ GPA نزل عن 3.70 نرجع المتغير لـ false عشان لو جابه تاني الزينة تضرب تاني
             hasFiredConfetti = false;
         }
 

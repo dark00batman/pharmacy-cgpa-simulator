@@ -366,7 +366,7 @@
       localStorage.setItem('ejust_pharmd_save', JSON.stringify(data));
     }
 
-    function loadData() {
+  function loadData() {
       isLoading = true;
       const savedString = localStorage.getItem('ejust_pharmd_save');
       
@@ -380,7 +380,9 @@
       
       if (data.theme === 'dark') toggleTheme(true);
       
-      currentSemesters = data.currentSemesters || 1;
+      // السطر السحري لحل المشكلة: بيمنع البرنامج إنه يفتح ترمات أكتر من المتاحة في اللايحة
+      currentSemesters = Math.min(data.currentSemesters || 1, semesters.length);
+      
       for (let i = 0; i < currentSemesters; i++) {
         createSemester(i);
       }

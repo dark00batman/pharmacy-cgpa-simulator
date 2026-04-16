@@ -324,7 +324,6 @@
     ];
 
     let currentSemesters = 1;
-    let isLoading = false; 
     let currentScholarshipLevel = 0; 
     let scholarshipTimer = null; 
 
@@ -339,67 +338,12 @@
         document.documentElement.removeAttribute('data-theme');
         themeToggle.textContent = "🌙 Dark Mode";
       }
-      if (!isLoading) saveData(); 
     }
 
     themeToggle.addEventListener('click', () => {
       const currentlyDark = document.documentElement.getAttribute('data-theme') === 'dark';
       toggleTheme(!currentlyDark);
     });
-
-    // --- AUTO-SAVE LOGIC ---
-    function saveData() {
-      if (isLoading) return; 
-
-      const data = {
-        theme: document.documentElement.getAttribute('data-theme') || 'light',
-        currentSemesters: currentSemesters,
-        inputs: {}
-      };
-      
-      document.querySelectorAll('input[type="number"]').forEach(inp => {
-        if (inp.value !== "") {
-          data.inputs[inp.id] = inp.value;
-        }
-      });
-
-      localStorage.setItem('ejust_pharmd_save', JSON.stringify(data));
-    }
-
-  function loadData() {
-      isLoading = true;
-      const savedString = localStorage.getItem('ejust_pharmd_save');
-      
-      if (!savedString) {
-        createSemester(0);
-        isLoading = false;
-        return;
-      }
-      
-      const data = JSON.parse(savedString);
-      
-      if (data.theme === 'dark') toggleTheme(true);
-      
-      // السطر السحري لحل المشكلة: بيمنع البرنامج إنه يفتح ترمات أكتر من المتاحة في اللايحة
-      currentSemesters = Math.min(data.currentSemesters || 1, semesters.length);
-      
-      for (let i = 0; i < currentSemesters; i++) {
-        createSemester(i);
-      }
-      
-      if (data.inputs) {
-        Object.keys(data.inputs).forEach(id => {
-          const el = document.getElementById(id);
-          if (el) {
-            el.value = data.inputs[id];
-            el.dispatchEvent(new Event('input')); 
-          }
-        });
-      }
-      
-      isLoading = false;
-      calculateCGPA(); 
-    }
 
     // --- CORE SIMULATOR LOGIC ---
     function createSemester(sIndex) {
@@ -456,7 +400,7 @@
 
       const note = document.createElement("span");
       note.classList.add("note");
-      note.textContent = "* Course is NOT calculated in the GPA.";
+      note.textContent = "* Course is a graduation requirement but is NOT calculated in the GPA.";
       div.appendChild(note);
 
       const gpaDiv = document.createElement("div");
@@ -476,7 +420,6 @@
           currentSemesters++;
           createSemester(currentSemesters - 1);
           btn.remove();
-          saveData();
         };
         div.appendChild(btn);
       }
@@ -657,8 +600,6 @@
       const cgpaBox = document.getElementById("cgpaBox");
       if (totalCredits > 0) {
         const rawCGPA = totalPoints / totalCredits;
-        
-        // التعديل السحري: تقريب الرقم فعلياً لرقمنين عشريين عشان الشروط تشتغل بدقة
         const cgpa = parseFloat(rawCGPA.toFixed(2));
         
         let targetLevel = 0;
@@ -675,26 +616,21 @@
         cgpaBox.innerHTML = `Cumulative GPA (CGPA): ${cgpa.toFixed(2)} | GPA Credits: ${totalCredits} | Passed: ${totalPassed} ${scholarshipMsg}`;
 
         clearTimeout(scholarshipTimer);
-        if (!isLoading) {
-            scholarshipTimer = setTimeout(() => {
-                if (targetLevel > currentScholarshipLevel) {
-                    triggerConfetti();
-                }
-                currentScholarshipLevel = targetLevel;
-            }, 800); 
-        } else {
+        scholarshipTimer = setTimeout(() => {
+            if (targetLevel > currentScholarshipLevel) {
+                triggerConfetti();
+            }
             currentScholarshipLevel = targetLevel;
-        }
+        }, 800); 
 
       } else {
         cgpaBox.innerHTML = `Cumulative GPA (CGPA): - | GPA Credits: 0 | Passed: ${totalPassed}`;
         currentScholarshipLevel = 0;
       }
-
-      saveData(); 
     }
 
-    loadData();
+    // بناء الترم الأول عند فتح الصفحة
+    createSemester(0);
 
   </script>
 </body>

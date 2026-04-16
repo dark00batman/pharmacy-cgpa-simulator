@@ -22,9 +22,9 @@
     }
 
     [data-theme="dark"] {
-      --primary: #5fa8d3;       /* Lighter blue for dark background */
-      --secondary: #ff4757;     /* Brighter red */
-      --success: #2ecc71;       /* Brighter green */
+      --primary: #5fa8d3;       
+      --secondary: #ff4757;     
+      --success: #2ecc71;       
       --background: #121212;   
       --card-bg: #1e1e1e;      
       --text-main: #e0e0e0;
@@ -209,7 +209,7 @@
       left: 0;
       width: 100%;
       background: var(--primary);
-      color: #ffffff; /* Always white regardless of theme */
+      color: #ffffff; 
       text-align: center;
       padding: 20px 10px;
       font-size: 20px;
@@ -218,6 +218,13 @@
       z-index: 1000;
       box-sizing: border-box;
       transition: background-color 0.3s ease;
+    }
+
+    .scholarship {
+      color: #ffd700; /* Gold color for the scholarship text */
+      font-weight: 800;
+      margin-left: 10px;
+      text-shadow: 0px 1px 3px rgba(0,0,0,0.5);
     }
 
     th:nth-child(1), td:nth-child(1) { width: 10%; font-weight: bold; color: var(--primary); }
@@ -242,7 +249,7 @@
     <div id="semesters"></div>
   </div>
 
-  <div id="cgpaBox" class="cgpa-box">Cumulative GPA (CGPA): - | Credits: 0 | Passed: 0</div>
+  <div id="cgpaBox" class="cgpa-box">Cumulative GPA (CGPA): - | GPA Credits: 0 | Passed: 0</div>
 
   <script>
     const gradingSystem = [
@@ -289,7 +296,7 @@
     ];
 
     let currentSemesters = 1;
-    let isLoading = false; // Prevents saving while loading initial data
+    let isLoading = false; 
 
     // --- DARK MODE LOGIC ---
     const themeToggle = document.getElementById('themeToggle');
@@ -302,7 +309,7 @@
         document.documentElement.removeAttribute('data-theme');
         themeToggle.textContent = "🌙 Dark Mode";
       }
-      if (!isLoading) saveData(); // Save preference
+      if (!isLoading) saveData(); 
     }
 
     themeToggle.addEventListener('click', () => {
@@ -320,7 +327,6 @@
         inputs: {}
       };
       
-      // Scrape all typed numbers and save them
       document.querySelectorAll('input[type="number"]').forEach(inp => {
         if (inp.value !== "") {
           data.inputs[inp.id] = inp.value;
@@ -342,28 +348,25 @@
       
       const data = JSON.parse(savedString);
       
-      // 1. Restore Theme
       if (data.theme === 'dark') toggleTheme(true);
       
-      // 2. Restore Semesters
       currentSemesters = data.currentSemesters || 1;
       for (let i = 0; i < currentSemesters; i++) {
         createSemester(i);
       }
       
-      // 3. Restore Inputs and Trigger Calculations
       if (data.inputs) {
         Object.keys(data.inputs).forEach(id => {
           const el = document.getElementById(id);
           if (el) {
             el.value = data.inputs[id];
-            el.dispatchEvent(new Event('input')); // This wakes up updateGrade()
+            el.dispatchEvent(new Event('input')); 
           }
         });
       }
       
       isLoading = false;
-      calculateCGPA(); // Final pass
+      calculateCGPA(); 
     }
 
     // --- CORE SIMULATOR LOGIC ---
@@ -428,7 +431,7 @@
       gpaDiv.classList.add("gpa");
       gpaDiv.innerHTML = `
         <span>GPA: <input id="gpaVal-${sIndex}" type="number" step="0.01" oninput="manualGPA(${sIndex}, true)"></span>
-        <span>Credits: <input id="gpaCredits-${sIndex}" type="number" step="1" oninput="manualGPA(${sIndex}, true)"></span>
+        <span>GPA Credits: <input id="gpaCredits-${sIndex}" type="number" step="1" oninput="manualGPA(${sIndex}, true)"></span>
         <span>Passed: <input id="gpaPassed-${sIndex}" type="number" step="1" oninput="manualGPA(${sIndex}, true)"></span>
       `;
       div.appendChild(gpaDiv);
@@ -531,7 +534,6 @@
 
         const gradeObj = gradingSystem[idx];
         
-        // Match CSS Variables for dynamic text coloring
         if(gradeObj.grade.includes("A")) gradeCell.style.color = "var(--success)";
         else if(gradeObj.grade.includes("B") || gradeObj.grade.includes("C")) gradeCell.style.color = "var(--primary)";
         else if(gradeObj.grade === "F") gradeCell.style.color = "var(--secondary)";
@@ -604,15 +606,24 @@
       const cgpaBox = document.getElementById("cgpaBox");
       if (totalCredits > 0) {
         const cgpa = totalPoints / totalCredits;
-        cgpaBox.textContent = `Cumulative GPA (CGPA): ${cgpa.toFixed(2)} | Credits: ${totalCredits} | Passed: ${totalPassed}`;
+        
+        // --- NEW SCHOLARSHIP LOGIC ---
+        let scholarshipMsg = "";
+        if (cgpa >= 3.85) {
+            scholarshipMsg = "<span class='scholarship'> | 🏆 40% Scholarship!</span>";
+        } else if (cgpa >= 3.70) {
+            scholarshipMsg = "<span class='scholarship'> | 🏆 20% Scholarship!</span>";
+        }
+
+        // We use innerHTML here so the HTML <span> tags render correctly
+        cgpaBox.innerHTML = `Cumulative GPA (CGPA): ${cgpa.toFixed(2)} | GPA Credits: ${totalCredits} | Passed: ${totalPassed} ${scholarshipMsg}`;
       } else {
-        cgpaBox.textContent = `Cumulative GPA (CGPA): - | Credits: 0 | Passed: ${totalPassed}`;
+        cgpaBox.innerHTML = `Cumulative GPA (CGPA): - | GPA Credits: 0 | Passed: ${totalPassed}`;
       }
 
-      saveData(); // Trigger save at the end of calculation
+      saveData(); 
     }
 
-    // Initialize application by loading any saved data
     loadData();
 
   </script>

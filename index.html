@@ -54,7 +54,6 @@
       position: relative;
     }
 
-    /* Header & Toggle Layout */
     .header-container {
       display: flex;
       justify-content: space-between;
@@ -140,7 +139,6 @@
 
     tr:last-child td { border-bottom: none; }
     
-    /* Input Styling */
     input[type="number"] { 
       width: 65px; 
       padding: 8px; 
@@ -207,7 +205,6 @@
     .add-btn:hover { background: #b00028; }
     .add-btn:active { transform: scale(0.98); }
 
-    /* Credits Styling */
     .creators-credit {
       text-align: center;
       margin-top: 40px;
@@ -328,7 +325,8 @@
 
     let currentSemesters = 1;
     let isLoading = false; 
-    let hasFiredConfetti = false; 
+    let currentScholarshipLevel = 0; 
+    let scholarshipTimer = null; 
 
     // --- DARK MODE LOGIC ---
     const themeToggle = document.getElementById('themeToggle');
@@ -595,7 +593,6 @@
       calculateCGPA();
     }
 
-    // --- دالة إطلاق الزينة ---
     function triggerConfetti() {
       var duration = 3 * 1000;
       var animationEnd = Date.now() + duration;
@@ -607,10 +604,7 @@
 
       var interval = setInterval(function() {
         var timeLeft = animationEnd - Date.now();
-
-        if (timeLeft <= 0) {
-          return clearInterval(interval);
-        }
+        if (timeLeft <= 0) return clearInterval(interval);
 
         var particleCount = 50 * (timeLeft / duration);
         confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
@@ -660,30 +654,39 @@
 
       const cgpaBox = document.getElementById("cgpaBox");
       if (totalCredits > 0) {
-        const cgpa = totalPoints / totalCredits;
+        const rawCGPA = totalPoints / totalCredits;
         
+        // التعديل السحري: تقريب الرقم فعلياً لرقمنين عشريين عشان الشروط تشتغل بدقة
+        const cgpa = parseFloat(rawCGPA.toFixed(2));
+        
+        let targetLevel = 0;
         let scholarshipMsg = "";
         
         if (cgpa >= 3.85) {
+            targetLevel = 40;
             scholarshipMsg = "<span class='scholarship'> | 🏆 40% Scholarship!</span>";
-            if (!hasFiredConfetti && !isLoading) {
-                triggerConfetti();
-                hasFiredConfetti = true;
-            }
         } else if (cgpa >= 3.70) {
+            targetLevel = 20;
             scholarshipMsg = "<span class='scholarship'> | 🏆 20% Scholarship!</span>";
-            if (!hasFiredConfetti && !isLoading) {
-                triggerConfetti();
-                hasFiredConfetti = true;
-            }
-        } else {
-            hasFiredConfetti = false;
         }
 
         cgpaBox.innerHTML = `Cumulative GPA (CGPA): ${cgpa.toFixed(2)} | GPA Credits: ${totalCredits} | Passed: ${totalPassed} ${scholarshipMsg}`;
+
+        clearTimeout(scholarshipTimer);
+        if (!isLoading) {
+            scholarshipTimer = setTimeout(() => {
+                if (targetLevel > currentScholarshipLevel) {
+                    triggerConfetti();
+                }
+                currentScholarshipLevel = targetLevel;
+            }, 800); 
+        } else {
+            currentScholarshipLevel = targetLevel;
+        }
+
       } else {
         cgpaBox.innerHTML = `Cumulative GPA (CGPA): - | GPA Credits: 0 | Passed: ${totalPassed}`;
-        hasFiredConfetti = false;
+        currentScholarshipLevel = 0;
       }
 
       saveData(); 

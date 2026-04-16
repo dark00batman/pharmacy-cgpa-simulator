@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>E-JUST PharmD CGPA Simulator</title>
+  
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
   <style>
     /* CSS Variables for Easy Theme Switching */
     :root {
@@ -221,10 +224,17 @@
     }
 
     .scholarship {
-      color: #ffd700; /* Gold color for the scholarship text */
+      color: #ffd700; 
       font-weight: 800;
       margin-left: 10px;
       text-shadow: 0px 1px 3px rgba(0,0,0,0.5);
+      animation: pop 0.5s ease-out;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(0.8); opacity: 0; }
+      50% { transform: scale(1.1); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
     }
 
     th:nth-child(1), td:nth-child(1) { width: 10%; font-weight: bold; color: var(--primary); }
@@ -297,6 +307,7 @@
 
     let currentSemesters = 1;
     let isLoading = false; 
+    let hasFiredConfetti = false; // متغير عشان نمنع الزينة تشتغل مع كل حرف بيتكتب
 
     // --- DARK MODE LOGIC ---
     const themeToggle = document.getElementById('themeToggle');
@@ -424,7 +435,7 @@
 
       const note = document.createElement("span");
       note.classList.add("note");
-      note.textContent = "* Course is NOT calculated in the GPA.";
+      note.textContent = "* Course is a graduation requirement but is NOT calculated in the GPA.";
       div.appendChild(note);
 
       const gpaDiv = document.createElement("div");
@@ -563,6 +574,29 @@
       calculateCGPA();
     }
 
+    // --- دالة إطلاق الزينة ---
+    function triggerConfetti() {
+      var duration = 3 * 1000;
+      var animationEnd = Date.now() + duration;
+      var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 10000 };
+
+      function randomInRange(min, max) {
+        return Math.random() * (max - min) + min;
+      }
+
+      var interval = setInterval(function() {
+        var timeLeft = animationEnd - Date.now();
+
+        if (timeLeft <= 0) {
+          return clearInterval(interval);
+        }
+
+        var particleCount = 50 * (timeLeft / duration);
+        confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+        confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+      }, 250);
+    }
+
     function calculateCGPA() {
       let totalCredits = 0, totalPoints = 0, totalPassed = 0;
 
@@ -607,18 +641,30 @@
       if (totalCredits > 0) {
         const cgpa = totalPoints / totalCredits;
         
-        // --- NEW SCHOLARSHIP LOGIC ---
         let scholarshipMsg = "";
+        
+        // منطق الاحتفال والمنحة
         if (cgpa >= 3.85) {
             scholarshipMsg = "<span class='scholarship'> | 🏆 40% Scholarship!</span>";
+            if (!hasFiredConfetti && !isLoading) {
+                triggerConfetti();
+                hasFiredConfetti = true;
+            }
         } else if (cgpa >= 3.70) {
             scholarshipMsg = "<span class='scholarship'> | 🏆 20% Scholarship!</span>";
+            if (!hasFiredConfetti && !isLoading) {
+                triggerConfetti();
+                hasFiredConfetti = true;
+            }
+        } else {
+            // لو الـ GPA نزل عن 3.70 نرجع المتغير لـ false عشان لو جابه تاني الزينة تضرب تاني
+            hasFiredConfetti = false;
         }
 
-        // We use innerHTML here so the HTML <span> tags render correctly
         cgpaBox.innerHTML = `Cumulative GPA (CGPA): ${cgpa.toFixed(2)} | GPA Credits: ${totalCredits} | Passed: ${totalPassed} ${scholarshipMsg}`;
       } else {
         cgpaBox.innerHTML = `Cumulative GPA (CGPA): - | GPA Credits: 0 | Passed: ${totalPassed}`;
+        hasFiredConfetti = false;
       }
 
       saveData(); 

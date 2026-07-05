@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>E-JUST PharmD CGPA Simulator</title>
   
+  <!-- مكتبة زينة الاحتفال (Confetti) -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
   <style>
@@ -272,7 +273,7 @@
     
     <div id="semesters"></div>
 
-    
+  
   </div>
 
   <div id="cgpaBox" class="cgpa-box">Cumulative GPA (CGPA): - | GPA Credits: 0 | Passed: 0</div>
@@ -317,6 +318,18 @@
           { code: "PBM121", name: "Cell Biology", credit: 2 },
           { code: "LRA402", name: "Japanese Language (2)", credit: 1, inGPA: false },
           { code: "NPC122", name: "Psychology", credit: 1 }
+        ]
+      },
+      {
+        name: "Semester 3 (Fall - Level 2)",
+        courses: [
+          { code: "LRA403", name: "Japanese Language (3)", credit: 1, inGPA: false },
+          { code: "PMC215", name: "Pharmaceutical Analytical Chemistry III", credit: 3 },
+          { code: "PMC216", name: "Pharmaceutical Organic Chemistry III", credit: 3 },
+          { code: "NPC213", name: "Scientific Writing", credit: 1 },
+          { code: "PHG213", name: "Pharmacognosy II", credit: 3 },
+          { code: "MED213", name: "Physiology and Pathophysiology", credit: 3 },
+          { code: "PIP213", name: "Pharmaceutics I", credit: 3 }
         ]
       }
     ];
@@ -398,7 +411,7 @@
 
       const note = document.createElement("span");
       note.classList.add("note");
-      note.textContent = "* Course is NOT calculated in the GPA.";
+      note.textContent = "* Course is a graduation requirement but is NOT calculated in the GPA.";
       div.appendChild(note);
 
       const gpaDiv = document.createElement("div");
@@ -627,7 +640,7 @@
       }
     }
 
-    // بناء الترم الأول عند فتح الصفحة
+    // بناء الترم الأول عند فتح الصفحة (بدون أي استرجاع من الذاكرة)
     createSemester(0);
 
   </script>

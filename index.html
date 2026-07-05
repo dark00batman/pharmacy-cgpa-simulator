@@ -611,8 +611,7 @@
       const cgpaBox = document.getElementById("cgpaBox");
       if (totalCredits > 0) {
         const rawCGPA = totalPoints / totalCredits;
-        const cgpa = parseFloat(rawCGPA.toFixed(2));
-        
+        const cgpa = Math.floor(rawCGPA * 100) / 100;        
         let targetLevel = 0;
         let scholarshipMsg = "";
         
